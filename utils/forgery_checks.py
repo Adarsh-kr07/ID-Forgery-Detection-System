@@ -1,4 +1,3 @@
-
 import cv2
 
 def check_blur(image):

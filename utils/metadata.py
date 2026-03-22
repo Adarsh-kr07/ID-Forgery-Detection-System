@@ -1,4 +1,3 @@
-# utils/metadata.py
 import exifread
 
 def get_metadata(file):
