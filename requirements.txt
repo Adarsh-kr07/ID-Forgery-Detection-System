@@ -1,0 +1,17 @@
+
+streamlit
+opencv-python
+numpy
+Pillow
+anthropic
+paddleocr
+paddlepaddle
+python-dotenv
+pydantic
+requests
+exifread
+# YOLO
+ultralytics
+# CNN (PyTorch)
+torch
+torchvision
