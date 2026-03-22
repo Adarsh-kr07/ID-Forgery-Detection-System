@@ -1,4 +1,3 @@
-
 import streamlit as st
 from PIL import Image
 import numpy as np
@@ -59,7 +58,7 @@ if uploaded_file:
         with st.spinner("Analyzing ID..."):
             img_np = np.array(image)
 
-            regions   = detect_regions(img_np)
+            regions    = detect_regions(img_np)
             cnn_result = cnn_predict(img_np)
             blur_score = check_blur(img_np)
             text       = extract_text(img_np)
@@ -67,6 +66,14 @@ if uploaded_file:
             report     = generate_report(blur_score, text, regions, cnn_result, metadata)
 
         st.subheader("📊 Fraud Detection Report")
+
+        risk = report.get("risk_level", "unknown") if isinstance(report, dict) else str(report)
+        if risk.lower() == "high":
+            st.error("🚨 FORGERY RISK: HIGH — This ID appears tampered or fake")
+        elif risk.lower() == "medium":
+            st.warning("⚠️ FORGERY RISK: MEDIUM — Some suspicious signs detected")
+        else:
+            st.success("✅ FORGERY RISK: LOW — No significant forgery detected")
 
         def is_danger(value):
             danger_words = ["fake", "forged", "tampered", "invalid", "fail",
@@ -87,39 +94,23 @@ if uploaded_file:
                 html += f'<div class="bullet"><span class="{css}">{items}</span></div>'
             return html
 
-        # Build full report HTML
         html = '<div class="report-box">'
 
-        # Blur
         html += render_section("Blur Detection", {
             "Blur Score": f"{blur_score:.2f}" if isinstance(blur_score, float) else blur_score
         })
 
-        # OCR
+
         html += render_section("OCR Extracted Text", {
             "Text": text if text else "No text detected"
         })
 
-        # YOLO
-        html += render_section("YOLO Detected Regions", {
-            "Regions Found": regions if regions else "None"
-        })
-
-        # CNN
-        if isinstance(cnn_result, dict):
-            html += render_section("CNN Prediction", cnn_result)
-        else:
-            html += render_section("CNN Prediction", {"Result": cnn_result})
-
-        # Metadata
-        if isinstance(metadata, dict):
-            html += render_section("Metadata Analysis", metadata)
-        else:
-            html += render_section("Metadata Analysis", {"Info": metadata})
-
-        # Final Report
         if isinstance(report, dict):
-            html += render_section("Final Report", report)
+            filtered_report = {
+                k: v for k, v in report.items()
+                if k not in ("blur_status", "cnn_prediction", "blur_score", "regions_detected")
+            }
+            html += render_section("Final Report", filtered_report)
         else:
             html += render_section("Final Report", {"Verdict": report})
 
